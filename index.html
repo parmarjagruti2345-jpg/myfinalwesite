@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JeevanSetu AI Ultra Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins;
+}
+
+body{
+background:linear-gradient(135deg,#667eea,#764ba2);
+color:white;
+min-height:100vh;
+}
+
+.page{
+display:none;
+padding:20px;
+animation:fade 0.4s;
+}
+
+.active{
+display:block;
+}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;}
+}
+
+.center{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+flex-direction:column;
+}
+
+.card{
+background:rgba(255,255,255,0.15);
+padding:20px;
+border-radius:20px;
+margin:10px;
+backdrop-filter:blur(10px);
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+input,textarea{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:none;
+border-radius:10px;
+}
+
+button{
+padding:12px 20px;
+border:none;
+border-radius:25px;
+background:#ffdd57;
+color:black;
+font-weight:600;
+cursor:pointer;
+margin-top:8px;
+}
+
+button:hover{
+transform:scale(1.05);
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+}
+
+.result{
+background:rgba(0,0,0,0.3);
+padding:15px;
+border-radius:10px;
+margin-top:10px;
+}
+
+.chatbox{
+height:200px;
+overflow:auto;
+background:rgba(0,0,0,0.3);
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
+}
+
+</style>
+
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="page active center">
+
+<div class="card">
+
+<h1>🌉 JeevanSetu AI</h1>
+<p>Your intelligent life assistant</p>
+
+<input id="username" placeholder="Enter your name">
+
+<button onclick="login()">Enter</button>
+
+</div>
+
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="page">
+
+<h2 id="welcome"></h2>
+
+<div class="grid">
+
+<div class="card">
+<h3>📚 Study Planner</h3>
+<button onclick="openPage('study')">Open</button>
+</div>
+
+<div class="card">
+<h3>💰 Expense Tracker</h3>
+<button onclick="openPage('expense')">Open</button>
+</div>
+
+<div class="card">
+<h3>🎯 Goal Tracker</h3>
+<button onclick="openPage('goal')">Open</button>
+</div>
+
+<div class="card">
+<h3>📄 Resume Builder</h3>
+<button onclick="openPage('resume')">Open</button>
+</div>
+
+<div class="card">
+<h3>🤖 AI Assistant</h3>
+<button onclick="openPage('chat')">Open</button>
+</div>
+
+</div>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+<!-- STUDY -->
+<div id="study" class="page">
+
+<button onclick="openPage('dashboard')">Back</button>
+
+<div class="card">
+
+<h2>Study Planner</h2>
+
+<input id="studySubject" placeholder="Subject">
+
+<button onclick="studyAI()">Generate Plan</button>
+
+<div id="studyResult" class="result"></div>
+
+</div>
+
+</div>
+
+<!-- EXPENSE -->
+<div id="expense" class="page">
+
+<button onclick="openPage('dashboard')">Back</button>
+
+<div class="card">
+
+<h2>Expense Tracker</h2>
+
+<input id="income" placeholder="Income">
+<input id="expenseInput" placeholder="Expense">
+
+<button onclick="expenseAI()">Analyze</button>
+
+<div id="expenseResult" class="result"></div>
+
+</div>
+
+</div>
+
+<!-- GOAL -->
+<div id="goal" class="page">
+
+<button onclick="openPage('dashboard')">Back</button>
+
+<div class="card">
+
+<h2>Goal Tracker</h2>
+
+<input id="goalInput" placeholder="Goal">
+
+<button onclick="goalAI()">Track</button>
+
+<div id="goalResult" class="result"></div>
+
+</div>
+
+</div>
+
+<!-- RESUME -->
+<div id="resume" class="page">
+
+<button onclick="openPage('dashboard')">Back</button>
+
+<div class="card">
+
+<h2>Resume Builder</h2>
+
+<input id="resumeName" placeholder="Name">
+<input id="resumeSkills" placeholder="Skills">
+<textarea id="resumeAbout" placeholder="About"></textarea>
+
+<button onclick="generateResume()">Generate</button>
+<button onclick="downloadResume()">Download PDF</button>
+
+<div id="resumeResult" class="result"></div>
+
+</div>
+
+</div>
+
+<!-- CHAT -->
+<div id="chat" class="page">
+
+<button onclick="openPage('dashboard')">Back</button>
+
+<div class="card">
+
+<h2>AI Assistant</h2>
+
+<div id="chatbox" class="chatbox"></div>
+
+<input id="chatInput" placeholder="Ask anything">
+
+<button onclick="sendChat()">Send</button>
+
+</div>
+
+</div>
+
+<script>
+
+function openPage(id){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+function login(){
+
+let name=document.getElementById("username").value;
+
+localStorage.setItem("user",name);
+
+document.getElementById("welcome").innerHTML=
+"Welcome "+name+" 👋 Your AI is ready.";
+
+openPage("dashboard");
+
+}
+
+function logout(){
+localStorage.clear();
+openPage("login");
+}
+
+window.onload=function(){
+
+let user=localStorage.getItem("user");
+
+if(user){
+
+document.getElementById("welcome").innerHTML=
+"Welcome back "+user+" 👋";
+
+openPage("dashboard");
+
+}
+
+}
+
+function studyAI(){
+
+let sub=document.getElementById("studySubject").value;
+
+let result=
+"AI Plan:<br>"+
+"📘 Study "+sub+" with focus sessions.<br>"+
+"🔥 You can master it.<br>"+
+"⭐ Stay consistent.";
+
+document.getElementById("studyResult").innerHTML=result;
+
+}
+
+function expenseAI(){
+
+let income=document.getElementById("income").value;
+let exp=document.getElementById("expenseInput").value;
+
+let save=income-exp;
+
+let result=(save>0)?
+"Saving ₹"+save+" Excellent discipline!":
+"Overspending. Control needed.";
+
+document.getElementById("expenseResult").innerHTML=result;
+
+}
+
+function goalAI(){
+
+let goal=document.getElementById("goalInput").value;
+
+document.getElementById("goalResult").innerHTML=
+"Goal '"+goal+"' registered. Success loading...";
+
+}
+
+function generateResume(){
+
+let name=document.getElementById("resumeName").value;
+let skills=document.getElementById("resumeSkills").value;
+let about=document.getElementById("resumeAbout").value;
+
+let text=name+"<br>"+skills+"<br>"+about;
+
+document.getElementById("resumeResult").innerHTML=text;
+
+localStorage.setItem("resume",text);
+
+}
+
+function downloadResume(){
+
+let text=localStorage.getItem("resume");
+
+let blob=new Blob([text],{type:"text/plain"});
+
+let a=document.createElement("a");
+
+a.href=URL.createObjectURL(blob);
+
+a.download="resume.txt";
+
+a.click();
+
+}
+
+function sendChat(){
+
+let input=document.getElementById("chatInput").value;
+
+let chat=document.getElementById("chatbox");
+
+chat.innerHTML+="You: "+input+"<br>";
+
+chat.innerHTML+="AI: Stay focused and believe in yourself.<br>";
+
+}
+
+</script>
+
+</body>
+</html>
