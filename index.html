@@ -3,25 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultra Pro PDF Studio X</title>
+<title>Super PDF Toolkit</title>
 
-<!-- Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <style>
 body{
 margin:0;
 font-family:Segoe UI;
-background:linear-gradient(135deg,#7c3aed,#ec4899);
-animation:move 8s infinite alternate;
+background:linear-gradient(135deg,#6d28d9,#ec4899);
 color:white;
 text-align:center;
-}
-@keyframes move{
-0%{background-position:left;}
-100%{background-position:right;}
 }
 
 .card{
@@ -32,8 +24,9 @@ margin:30px auto;
 padding:25px;
 border-radius:25px;
 box-shadow:0 15px 40px rgba(0,0,0,0.3);
-animation:fade 1s ease-in-out;
+animation:fade 0.8s ease-in-out;
 }
+
 @keyframes fade{
 from{opacity:0;transform:translateY(20px);}
 to{opacity:1;transform:translateY(0);}
@@ -44,128 +37,185 @@ padding:10px 20px;
 border:none;
 border-radius:25px;
 margin:8px;
-background:linear-gradient(45deg,#7c3aed,#ec4899);
+background:linear-gradient(45deg,#6d28d9,#ec4899);
 color:white;
 cursor:pointer;
 transition:0.3s;
 }
+
 button:hover{
-transform:scale(1.08);
+transform:scale(1.07);
 }
 
-#editor{
-min-height:200px;
-border:1px solid #ccc;
-border-radius:15px;
+input, textarea{
+width:90%;
 padding:10px;
-margin-top:15px;
-text-align:left;
+margin:10px;
+border-radius:15px;
+border:1px solid #ccc;
 }
 
-input[type=range]{
-width:80%;
+.app-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
+margin-top:20px;
 }
 
-.dark{
-background:#111;
-color:white;
+.app-box{
+background:#f3f4f6;
+padding:20px;
+border-radius:20px;
+cursor:pointer;
+transition:0.3s;
 }
+
+.app-box:hover{
+background:#e9d5ff;
+transform:scale(1.05);
+}
+
+.hidden{display:none;}
+canvas{max-width:100%;}
 </style>
 </head>
+
 <body>
 
-<div class="card" id="loginPage">
-<h2>Login with Gmail</h2>
-<button onclick="googleLogin()">Sign in with Google</button>
+<!-- USERNAME PAGE -->
+<div class="card" id="usernamePage">
+<h2>Welcome to Super PDF Toolkit</h2>
+<input type="text" id="usernameInput" placeholder="Enter your username">
+<br>
+<button onclick="enterApp()">Enter</button>
 </div>
 
-<div class="card" id="appPage" style="display:none;">
-<h2>Ultra Pro PDF Studio X</h2>
+<!-- DASHBOARD -->
+<div class="card hidden" id="dashboard">
+<h2 id="welcomeText"></h2>
+<h3>Select Your Tool</h3>
 
-<button onclick="toggleDark()">Dark Mode</button>
+<div class="app-grid">
 
-<hr>
-
-<input type="file" id="imageInput" accept="image/*">
-<br>
-<label>Resize Scale:</label>
-<input type="range" min="0.1" max="2" step="0.1" value="1" id="scaleSlider">
-
-<div id="preview"></div>
-
-<hr>
-
-<h3>Word Style Editor</h3>
-<div contenteditable="true" id="editor">
-Type your text here...
+<div class="app-box" onclick="openApp('textPDF')">
+📝 Text to PDF
 </div>
 
-<br>
+<div class="app-box" onclick="openApp('imagePDF')">
+🖼 Image to PDF
+</div>
 
-<button onclick="imageToPDF()">Image → PDF</button>
-<button onclick="textToPDF()">Text → PDF</button>
-<button onclick="resizeImage()">Resize Image</button>
-<button onclick="removeBG()">Remove BG</button>
+<div class="app-box" onclick="openApp('resize')">
+📏 Image Resize
+</div>
 
+<div class="app-box" onclick="openApp('bgRemove')">
+🎨 Background Remove
+</div>
+
+</div>
+</div>
+
+<!-- APP SECTION -->
+<div class="card hidden" id="appSection">
+<button onclick="goBack()">⬅ Back</button>
+<div id="appContent"></div>
 </div>
 
 <script>
-// 🔥 Paste Firebase Config Here
-const firebaseConfig = {
-apiKey: "YOUR_API_KEY",
-authDomain: "YOUR_AUTH_DOMAIN",
-projectId: "YOUR_PROJECT_ID",
-};
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-
-function googleLogin(){
-const provider = new firebase.auth.GoogleAuthProvider();
-auth.signInWithPopup(provider)
-.then(()=>{
-document.getElementById("loginPage").style.display="none";
-document.getElementById("appPage").style.display="block";
-});
+function enterApp(){
+let name=document.getElementById("usernameInput").value;
+if(name==="") return alert("Enter username");
+document.getElementById("usernamePage").classList.add("hidden");
+document.getElementById("dashboard").classList.remove("hidden");
+document.getElementById("welcomeText").innerText="Hello "+name+" 👋";
 }
 
-// DARK MODE
-function toggleDark(){
-document.body.classList.toggle("dark");
+function goBack(){
+document.getElementById("appSection").classList.add("hidden");
+document.getElementById("dashboard").classList.remove("hidden");
 }
 
-// IMAGE TO PDF
-async function imageToPDF(){
-const file=document.getElementById("imageInput").files[0];
+function openApp(type){
+document.getElementById("dashboard").classList.add("hidden");
+document.getElementById("appSection").classList.remove("hidden");
+
+let content="";
+
+if(type==="textPDF"){
+content=`
+<h3>Text to PDF</h3>
+<textarea id="textData" rows="6" placeholder="Type your text"></textarea>
+<br>
+<button onclick="createTextPDF()">Download PDF</button>
+`;
+}
+
+if(type==="imagePDF"){
+content=`
+<h3>Image to PDF</h3>
+<input type="file" id="imgPDF" accept="image/*">
+<br>
+<button onclick="createImagePDF()">Download PDF</button>
+`;
+}
+
+if(type==="resize"){
+content=`
+<h3>Resize Image</h3>
+<input type="file" id="resizeImg" accept="image/*">
+<br>
+<input type="range" min="0.2" max="2" step="0.1" value="1" id="scaleRange">
+<br>
+<button onclick="resizeImage()">Resize</button>
+<div id="resizePreview"></div>
+`;
+}
+
+if(type==="bgRemove"){
+content=`
+<h3>Background Remove</h3>
+<input type="file" id="bgImg" accept="image/*">
+<br>
+<button onclick="removeBG()">Remove Background</button>
+<div id="bgPreview"></div>
+`;
+}
+
+document.getElementById("appContent").innerHTML=content;
+}
+
+// TEXT PDF
+function createTextPDF(){
+const text=document.getElementById("textData").value;
+const { jsPDF }=window.jspdf;
+const pdf=new jsPDF();
+pdf.text(text,10,10);
+pdf.save("TextPDF.pdf");
+}
+
+// IMAGE PDF
+function createImagePDF(){
+const file=document.getElementById("imgPDF").files[0];
 if(!file) return alert("Upload image");
 
 const reader=new FileReader();
 reader.onload=function(e){
-const { jsPDF } = window.jspdf;
+const { jsPDF }=window.jspdf;
 const pdf=new jsPDF("p","mm","a4");
-pdf.addImage(e.target.result,'JPEG',10,10,190,270);
+pdf.addImage(e.target.result,"JPEG",10,10,190,270);
 pdf.save("ImagePDF.pdf");
 }
 reader.readAsDataURL(file);
 }
 
-// TEXT TO MULTI PAGE PDF
-function textToPDF(){
-const text=document.getElementById("editor").innerText;
-const { jsPDF } = window.jspdf;
-const pdf=new jsPDF("p","mm","a4");
-
-const lines = pdf.splitTextToSize(text, 180);
-pdf.text(lines, 15, 20);
-pdf.save("TextPDF.pdf");
-}
-
-// RESIZE IMAGE WITH SLIDER
+// RESIZE
 function resizeImage(){
-const file=document.getElementById("imageInput").files[0];
+const file=document.getElementById("resizeImg").files[0];
+const scale=document.getElementById("scaleRange").value;
 if(!file) return alert("Upload image");
 
-const scale=document.getElementById("scaleSlider").value;
 const img=new Image();
 const reader=new FileReader();
 
@@ -177,16 +227,16 @@ canvas.width=img.width*scale;
 canvas.height=img.height*scale;
 const ctx=canvas.getContext("2d");
 ctx.drawImage(img,0,0,canvas.width,canvas.height);
-document.getElementById("preview").innerHTML="";
-document.getElementById("preview").appendChild(canvas);
+document.getElementById("resizePreview").innerHTML="";
+document.getElementById("resizePreview").appendChild(canvas);
 }
 }
 reader.readAsDataURL(file);
 }
 
-// BETTER BG REMOVE
+// BG REMOVE
 function removeBG(){
-const file=document.getElementById("imageInput").files[0];
+const file=document.getElementById("bgImg").files[0];
 if(!file) return alert("Upload image");
 
 const img=new Image();
@@ -200,23 +250,22 @@ canvas.width=img.width;
 canvas.height=img.height;
 const ctx=canvas.getContext("2d");
 ctx.drawImage(img,0,0);
-const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-const data=imgData.data;
+const data=ctx.getImageData(0,0,canvas.width,canvas.height);
 
-for(let i=0;i<data.length;i+=4){
-let r=data[i], g=data[i+1], b=data[i+2];
-if(r>220 && g>220 && b>220){
-data[i+3]=0;
+for(let i=0;i<data.data.length;i+=4){
+if(data.data[i]>220 && data.data[i+1]>220 && data.data[i+2]>220){
+data.data[i+3]=0;
 }
 }
 
-ctx.putImageData(imgData,0,0);
-document.getElementById("preview").innerHTML="";
-document.getElementById("preview").appendChild(canvas);
+ctx.putImageData(data,0,0);
+document.getElementById("bgPreview").innerHTML="";
+document.getElementById("bgPreview").appendChild(canvas);
 }
 }
 reader.readAsDataURL(file);
 }
+
 </script>
 
 </body>
